@@ -1,17 +1,66 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import "./index.css";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const addButton = document.querySelector("#add");
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const updateLSData = () => {
+  const textAreaData = document.querySelectorAll("textarea");
+  const notes = [];
+  console.log(textAreaData);
+  textAreaData.forEach((note) => {
+    return notes.push(note.value);
+  });
+  console.log(notes);
+
+  localStorage.setItem("notes", JSON.stringify(notes));
+};
+
+const addNewNote = (text = "") => {
+  const note = document.createElement("div");
+  note.classList.add("note");
+
+  const htmlData = `
+    <div class="operation">
+        <button class="edit"> <i class="fas fa-edit"></i> </button>
+        <button class="delete"> <i class="fas fa-trash-alt"></i> </button>
+    </div>
+
+    <div class="main ${text ? "" : "hidden"} "> </div>
+    <textarea class="${text ? "hidden" : ""}"></textarea>  `;
+
+  note.insertAdjacentHTML("afterbegin", htmlData);
+
+  const editButton = note.querySelector(".edit");
+  const delButton = note.querySelector(".delete");
+  const mainDiv = note.querySelector(".main");
+  const textArea = note.querySelector("textarea");
+
+  delButton.addEventListener("click", () => {
+    note.remove();
+    updateLSData();
+  });
+
+  textArea.value = text;
+  mainDiv.innerHTML = text;
+
+  editButton.addEventListener("click", () => {
+    mainDiv.classList.toggle("hidden");
+    textArea.classList.toggle("hidden");
+  });
+
+  textArea.addEventListener("change", (event) => {
+    const value = event.target.value;
+    mainDiv.innerHTML = value;
+
+    updateLSData();
+  });
+
+  document.body.appendChild(note);
+};
+
+const notes = JSON.parse(localStorage.getItem("notes"));
+
+if (notes) {
+  notes.forEach((note) => addNewNote(note));
+}
+
+addButton.addEventListener("click", () => addNewNote());
